@@ -1,1 +1,1 @@
-# Pixel-Squre-Subdivider
+# Pixel-Square-Subdivider
