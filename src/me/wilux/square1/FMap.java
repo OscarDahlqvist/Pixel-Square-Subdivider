@@ -1,23 +1,13 @@
-package me.wilux;
+package me.wilux.square1;
+
+import me.wilux.helper_classes.LLNode;
+import me.wilux.helper_classes.Pos;
+import me.wilux.helper_classes.Square;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-
-class LLNode<T> {
-    T value;
-    LLNode<T> tail;
-
-    LLNode append(T value){
-        return new LLNode<T>(value,this);
-    }
-
-    public LLNode(T value, LLNode<T> tail){
-        this.value = value;
-        this.tail = tail;
-    }
-}
 
 class FMap implements Comparable {
     private int nSquares;
@@ -95,59 +85,28 @@ class FMap implements Comparable {
         return Float.compare(left.fillPerSquare, right.fillPerSquare);
     }
 
-    public boolean[][] getGrid() {
-        return grid;
-    }
+    public boolean[][] getGrid() { return grid;}
 
-    public HashSet<Pos> getUnfilledPosSet() {
-        return unfilledPosSet;
-    }
+    public HashSet<Pos> getUnfilledPosSet() { return unfilledPosSet; }
 
-    public int getHeight() {
-        return height;
-    }
+    public int getHeight() { return height; }
 
-    public int getWidth() {
-        return width;
-    }
+    public int getWidth() { return width; }
 
-    public int getnFilled() {
-        return nFilled;
-    }
+    public int getnFilled() { return nFilled; }
 
     public List<Square> getSquares() {
         List<Square> squareList = new ArrayList<>();
         LLNode<Square> curr = this.squares;
 
-        while (curr != null && curr.value != null){
-            squareList.add(curr.value);
-            curr = curr.tail;
+        while (curr != null && curr.getValue() != null){
+            squareList.add(curr.getValue());
+            curr = curr.getTail();
         }
 
         return squareList;
     }
 }
 
-class Square {
-    Pos pos;
-    int extension;
-    Square(Pos pos, int extension){
-        this.pos = pos;
-        this.extension = extension;
-    }
 
-    @Override
-    public int hashCode() { return pos.hashCode()+extension; }
-}
 
-class Pos {
-    int x;
-    int y;
-    Pos(int x, int y){
-        this.x = x;
-        this.y = y;
-    }
-
-    @Override
-    public int hashCode() { return x+y; }
-}

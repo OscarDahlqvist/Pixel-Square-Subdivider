@@ -1,26 +1,26 @@
-package me.wilux;
+package me.wilux.square1;
 
-import java.io.File;
+import me.wilux.helper_classes.LLNode;
+import me.wilux.helper_classes.Pos;
+import me.wilux.helper_classes.Square;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PriorityQueue;
 
 public class Main {
 
     public static void main(String[] args) {
         String[] smap = {
-            "#########...",
-            "...######...",
-            "...######...",
-            "............",
-            "...###......",
-            "...#########",
+            "########....",
+            "...##.......",
+            "...##.......",
+            "...##.......",
+            ".........###",
+            ".........###",
+            "#..#########",
         };
-        String[] smap2 = {
-                "#######....",
-                "......#....",
-                "......#....",
-                "...#....###",
-                "#..####.###",
-        };
+
         int smapHeight= smap.length;
         int smapWidth = smap[0].length();
 
@@ -33,16 +33,78 @@ public class Main {
         }
 
         //TODO: divide avanced maps
-        renderMap(grid);
-    }
 
-    public static void renderMap(boolean[][] grid){
         FMap baseMap = new FMap(
                 0,
                 new LLNode<>(null,null),
                 0,
                 grid
         );
+
+        prnt(baseMap,'#');
+        FMap uncor = subdivideFmap(baseMap);
+        renderMap(uncor);
+    }
+
+    //TODO: this function overrides the input, (make it not)
+    public static FMap subdivideFmap(FMap srcMap){
+        List<Pos> corridors = findCorridors(srcMap);
+        boolean[][] grid = srcMap.getGrid();
+        for (Pos p: corridors) {
+            grid[p.y][p.x] = true;
+        }
+        prnt(srcMap,'#');
+        return srcMap;
+    }
+
+    public static List<Pos> findCorridors(FMap srcMap){
+        boolean[][] grid = srcMap.getGrid();
+        int height= grid.length;
+        int width = grid[0].length;
+
+        List<List<Pos>> filters = get1Filters();
+
+        //Find 1 wide corridors
+        List<Pos> corridors = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                for (List<Pos> filter: filters) {
+                    boolean matchesFilter = true;
+                    for (Pos pos: filter) {
+                        int dx = pos.x;
+                        int dy = pos.y;
+                        if(!unfillable(srcMap,x+dx,y+dy)){
+                            matchesFilter = false;
+                            break;
+                        }
+                    }
+                    if(matchesFilter){
+                        corridors.add(new Pos(x,y));
+                    }
+                }
+            }
+        }
+        return corridors;
+    }
+
+    public static List<List<Pos>> get1Filters(){
+
+        List<List<Pos>> filters = new ArrayList<>();
+        for (String[] strFilt: strFilter) {
+            ArrayList<Pos> filt = new ArrayList<>();
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    if(strFilt[y].charAt(x) == '#')
+                        filt.add(new Pos(x-1,y-1));
+                }
+            }
+            filters.add(filt);
+        }
+        return filters;
+    }
+
+    public static void renderMap(FMap baseMap){
+        boolean[][] grid = baseMap.getGrid();
 
         int height= grid.length;
         int width = grid[0].length;
@@ -107,13 +169,16 @@ public class Main {
 
     public static boolean unfillable(FMap fmap, int x, int y){
         boolean[][] grid = fmap.getGrid();
-        if(y>=fmap.getHeight() || x>=fmap.getWidth()){
+        if(y>=fmap.getHeight() || x>=fmap.getWidth() || x<0 || y<0){
             return true;
         }
         return grid[y][x];
     }
 
     public static void prnt(FMap fmap){
+        prnt(fmap, '.');
+    }
+    public static void prnt(FMap fmap, char wallChar){
         int height = fmap.getHeight();
         int width = fmap.getWidth();
 
@@ -122,7 +187,7 @@ public class Main {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 if(fmap.getGrid()[y][x])
-                    chars[y][x] = '.';
+                    chars[y][x] = wallChar;
                 else
                     chars[y][x] = ' ';
             }
@@ -152,4 +217,28 @@ public class Main {
         }
         System.out.println(sb);
     }
+
+    public static final String[][] strFilter = new String[][]{
+            {"#  ",
+             "  #",
+             " # ",},
+            {" # ",
+             "  #",
+             "#  ",},
+            {" # ",
+             "#  ",
+             "  #",},
+            {"  #",
+             "#  ",
+             " # ",},
+            {"   ",
+             "# #",
+             "   ",},
+            {" # ",
+             "   ",
+             " # ",},
+            {"# #",
+             "   ",
+             "# #",},
+    };
 }
